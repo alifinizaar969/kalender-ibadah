@@ -1,0 +1,26 @@
+name: Perbarui Kalender Ibadah
+
+on:
+  schedule:
+    - cron: "23 17 * * 0"   # tiap Senin dini hari, sekitar 00.23 WIB
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  perbarui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Buat file kalender
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 scripts/buat_kalender.py
+      - name: Simpan ke repo
+        run: |
+          git config user.name "kalender-bot"
+          git config user.email "kalender-bot@users.noreply.github.com"
+          git add ibadah.ics
+          git commit -m "Perbarui kalender ibadah" || echo "Tidak ada perubahan"
+          git push
